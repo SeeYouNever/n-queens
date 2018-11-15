@@ -65,33 +65,38 @@ window.countNRooksSolutions = function(n) {
 window.findNQueensSolution = function(rowSize) {
   //create board of size n
   var board = new Board({n: rowSize});
-  var solution = board.rows().map(el => el.map(el => el));
+  var solution = board.rows();
+  var complete = false;
 
   //inner function(board)  
   var findValidMoves = function(rowIndex) {
+    //"optimization"    
+    if (complete) return;
+    
     //create row
     var row = board.rows()[rowIndex];
     
-      //base case
-      if (rowIndex === rowSize) {
-        solution = board.rows().map(el => el.map(el => el));
-        return;
+    //base case
+    if (rowIndex === rowSize) {
+      solution = board.rows().map(el => el.map(el => el));
+      complete = true;
+      return;
+    }
+    
+    //find valid row
+    for (var columnIndex = 0; columnIndex < row.length; columnIndex++) {
+      board.togglePiece(rowIndex, columnIndex);
+      if (!board.hasAnyQueensConflicts()) {
+        findValidMoves(rowIndex + 1);
       }
-      
-      //find valid row
-      for (var columnIndex = 0; columnIndex < row.length; columnIndex++) {
-        board.togglePiece(rowIndex, columnIndex);
-        if (!board.hasAnyQueensConflicts()) {
-          findValidMoves(rowIndex + 1);
-        }
-        board.togglePiece(rowIndex, columnIndex);
-      }
-      
-      //if no valid row, return to previous row
-      var rowPieces = row.reduce((rowSum, indexValue) => rowSum + indexValue);
-      if (rowPieces === 0) {
-        return;
-      }
+      board.togglePiece(rowIndex, columnIndex);
+    }
+    
+    //if no valid row, return to previous row
+    var rowPieces = row.reduce((rowSum, indexValue) => rowSum + indexValue);
+    if (rowPieces === 0) {
+      return;
+    }
   };
   
   //start at first row
@@ -100,12 +105,46 @@ window.findNQueensSolution = function(rowSize) {
   return solution;
 };
 
-// return the number of nxn chessboards that exist, with n queens placed such that none of them can attack each other
-window.countNQueensSolutions = function(n) {
-  var solutionCount;
-  //no solutions when n < 4
-  //
 
-  console.log('Number of solutions for ' + n + ' queens:', solutionCount);
+
+
+// return the number of nxn chessboards that exist, with n queens placed such that none of them can attack each other
+window.countNQueensSolutions = function(rowSize) {
+  var solutionCount = 0;
+  
+  if (rowSize === 2 || rowSize === 3) return 0;
+    //create board of size n
+  var board = new Board({n: rowSize});
+
+  //inner function(board)  
+  var findValidMoves = function(rowIndex) {
+    //create row
+    var row = board.rows()[rowIndex];
+    
+    //base case
+    if (rowIndex === rowSize) {
+      solutionCount++;
+      return;
+    }
+    
+    //find valid row
+    for (var columnIndex = 0; columnIndex < row.length; columnIndex++) {
+      board.togglePiece(rowIndex, columnIndex);
+      if (!board.hasAnyQueensConflicts()) {
+        findValidMoves(rowIndex + 1);
+      }
+      board.togglePiece(rowIndex, columnIndex);
+    }
+    
+    //if no valid row, return to previous row
+    var rowPieces = row.reduce((rowSum, indexValue) => rowSum + indexValue);
+    if (rowPieces === 0) {
+      return;
+    }
+  };
+  
+  
+  findValidMoves(0); 
+  console.log('Number of solutions for ' + rowSize + ' queens:', solutionCount);
   return solutionCount;
 };
