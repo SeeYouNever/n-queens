@@ -65,41 +65,36 @@ window.countNRooksSolutions = function(n) {
 window.findNQueensSolution = function(rowSize) {
   //create board of size n
   var board = new Board({n: rowSize});
-  var solution = board.rows();
-  if (rowSize === 2 || rowSize === 3) {
-    return solution;
-  }
-  //inner function(board)
-  
-  
-  
+  var solution = board.rows().map(el => el.map(el => el));
+
+  //inner function(board)  
   var findValidMoves = function(rowIndex) {
-    if (rowIndex === rowSize) {
-      solution = board.rows().slice();
-      return;
-    } else {
-      var row = board.rows()[rowIndex];
-      var numPieces = board.rows().reduce((totalSum, row) => {
-        return row.reduce((rowSum, indexValue) => rowSum + indexValue);
-      }, 0);
+    //create row
+    var row = board.rows()[rowIndex];
+    
+      //base case
+      if (rowIndex === rowSize) {
+        solution = board.rows().map(el => el.map(el => el));
+        return;
+      }
       
+      //find valid row
       for (var columnIndex = 0; columnIndex < row.length; columnIndex++) {
         board.togglePiece(rowIndex, columnIndex);
         if (!board.hasAnyQueensConflicts()) {
           findValidMoves(rowIndex + 1);
-        } else {
-          board.togglePiece(rowIndex, columnIndex);
         }
+        board.togglePiece(rowIndex, columnIndex);
       }
       
-      if (numPieces === 0) {
+      //if no valid row, return to previous row
+      var rowPieces = row.reduce((rowSum, indexValue) => rowSum + indexValue);
+      if (rowPieces === 0) {
         return;
       }
-    }
   };
   
-  
-  
+  //start at first row
   findValidMoves(0);  
   console.log('Single solution for ' + rowSize + ' queens:', JSON.stringify(solution));
   return solution;
