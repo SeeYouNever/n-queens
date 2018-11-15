@@ -15,20 +15,36 @@
 
 
 
-window.findNRooksSolution = function(n) {
-  var solution = undefined; //fixme
-  
+window.findNRooksSolution = function(size) {
+  var solution; //fixme
   //create board of size n
+  var board = new Board({n:size});
   //initialize array of illegal moves
-  
+  var illegalMoves = [];
+  var count = 0;
   //inner function(board)
-    //toggle piece
+  function findValidMoves(board){
     //loop through rows and columns
-      //toggle piece
-      //if conflict push into illegal array and untoggle piece
-      //else call inner function on new board
-
-  console.log('Single solution for ' + n + ' rooks:', JSON.stringify(solution));
+    for (var i = 0; i < board.rows().length; i++){
+      for (var j = 0; j < board.rows().length; j++){
+        //toggle piece
+        if (count === size){
+          solution = board.rows().slice(); 
+        } else if (!illegalMoves.includes(String([i,j]))){
+            board.togglePiece(i,j);
+            count++;
+            if (board.hasAnyRooksConflicts()){
+              board.togglePiece(i,j);
+              count--;
+            } 
+            illegalMoves.push(String([i,j]));
+            findValidMoves(board);
+        }
+      }
+    }
+  }
+  findValidMoves(board);
+  console.log('Single solution for ' + size + ' rooks:', JSON.stringify(solution));
   return solution;
 };
 
@@ -43,10 +59,42 @@ window.countNRooksSolutions = function(n) {
 };
 
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n queens placed such that none of them can attack each other
-window.findNQueensSolution = function(n) {
-  var solution = undefined; //fixme
-
-  console.log('Single solution for ' + n + ' queens:', JSON.stringify(solution));
+window.findNQueensSolution = function(size) {
+  //create board of size n
+  var board = new Board({n:size});
+  var solution = board.rows();
+  if (size === 2 || size === 3) return solution;
+  //initialize array of illegal moves
+  var illegalMoves = [];
+  //inner function(board)
+  function findValidMoves(board){
+    console.log(board.rows());
+    //loop through rows and columns
+    for (var i = 0; i < board.rows().length; i++){
+      for (var j = 0; j < board.rows().length; j++){
+        //toggle piece
+        var numPieces = board.rows().reduce((a,b) =>{
+          if (b === 1) a++;
+          return a;
+        },0);
+        if (numPieces === size){
+          solution = board.rows().slice(); 
+        } else if (!illegalMoves.includes(String([i,j]))){
+            board.togglePiece(i,j);
+            if ((numPieces + 1 === size) && board.hasAnyQueensConflicts()){
+              illegalMoves = [String]
+            }
+            if (board.hasAnyQueensConflicts()){
+              board.togglePiece(i,j);
+            } 
+            illegalMoves.push(String([i,j]));
+            findValidMoves(board);
+        }
+      }
+    }
+  }
+  findValidMoves(board);
+  console.log('Single solution for ' + size + ' queens:', JSON.stringify(solution));
   return solution;
 };
 
@@ -54,6 +102,7 @@ window.findNQueensSolution = function(n) {
 window.countNQueensSolutions = function(n) {
   var solutionCount;
 //no solutions when n < 4
+//
 
   console.log('Number of solutions for ' + n + ' queens:', solutionCount);
   return solutionCount;
