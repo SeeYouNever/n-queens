@@ -17,33 +17,30 @@
 
 window.findNRooksSolution = function(size) {
   var solution; //fixme
+  var complete = false;
   //create board of size n
   var board = new Board({n: size});
-  //initialize array of illegal moves
-  var illegalMoves = [];
-  var count = 0;
+
   //inner function(board)
-  var findValidMoves = function (board) {
+  var findValidMoves = function (rowIndex) {
     //loop through rows and columns
-    for (var i = 0; i < board.rows().length; i++) {
-      for (var j = 0; j < board.rows().length; j++) {
-        //toggle piece
-        if (count === size) {
-          solution = board.rows().slice(); 
-        } else if (!illegalMoves.includes(String([i, j]))) {
-          board.togglePiece(i, j);
-          count++;
-          if (board.hasAnyRooksConflicts()) {
-            board.togglePiece(i, j);
-            count--;
-          } 
-          illegalMoves.push(String([i, j]));
-          findValidMoves(board);
+    if (rowIndex === size) {
+      solution = board.rows().map(el => el.map(el => el));
+      complete = true;
+      return;
+    }
+    
+    for (var i = 0; i < size; i++) {
+      if (!complete) {
+        board.togglePiece(rowIndex,i);
+        if (!board.hasColConflictAt(i)){
+          findValidMoves(rowIndex + 1);
         }
+        board.togglePiece(rowIndex,i);
       }
     }
   };
-  findValidMoves(board);
+  findValidMoves(0);
   console.log('Single solution for ' + size + ' rooks:', JSON.stringify(solution));
   return solution;
 };
@@ -66,7 +63,7 @@ window.countNRooksSolutions = function(n) {
     for (var i = 0; i < n; i++) {
       if (!occCol.includes(i)){
         board.togglePiece(rowIndex,i);
-        if (!board.hasAnyColConflicts()){
+        if (!board.hasColConflictAt(i)){
           occCol.push(i)
           countSolutions(rowIndex + 1);
         }
@@ -154,7 +151,7 @@ window.countNQueensSolutions = function(rowSize) {
     //find valid row
     for (var columnIndex = 0; columnIndex < row.length; columnIndex++) {
       board.togglePiece(rowIndex, columnIndex);
-      if (!(board.hasAnyColConflicts() || board.hasAnyMajorDiagonalConflicts() || board.hasAnyMinorDiagonalConflicts())) {
+      if (!(board.hasColConflictAt(columnIndex) || board.hasAnyMajorDiagonalConflicts() || board.hasAnyMinorDiagonalConflicts())) {
         findValidMoves(rowIndex + 1);
       }
       board.togglePiece(rowIndex, columnIndex);

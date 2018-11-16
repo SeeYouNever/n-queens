@@ -97,13 +97,16 @@
     //
     // test if a specific column on this board contains a conflict
     hasColConflictAt: function(colIndex) {
-      var colArr = [];
-      this.rows().forEach(row =>{
-        for (var i = 0; i < row.length; i++){
-          colArr[i] !== undefined ? colArr[i].push(row[i]) : colArr[i] = [row[i]];
+      var occ = false;
+      for (var i = 0; i < this.rows().length; i++){
+        if (this.rows()[i][colIndex] === 1) {
+          if (occ === true) {
+            return true;
+          }
+          occ = true;
+          };
         }
-      });
-      return colArr[colIndex].filter(el => el !== 0).length > 1;
+      return false;
     },
 
     // test if any columns on this board contain conflicts
