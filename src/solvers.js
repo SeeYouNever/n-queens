@@ -50,10 +50,34 @@ window.findNRooksSolution = function(size) {
 
 // return the number of nxn chessboards that exist, with n rooks placed such that none of them can attack each other
 window.countNRooksSolutions = function(n) {
-  var solutionCount = 1;
-  for (var i = 2; i <= n; i++) {
-    solutionCount = solutionCount * i;
+  
+  var solutionCount = 0;
+  var board = new Board({n: n});
+  var occCol = [];
+  
+  var countSolutions = function(rowIndex) {
+    
+    
+    if (rowIndex === n) {
+      solutionCount++;
+      return;
+    }
+    
+    for (var i = 0; i < n; i++) {
+      if (!occCol.includes(i)){
+        board.togglePiece(rowIndex,i);
+        if (!board.hasAnyColConflicts()){
+          occCol.push(i)
+          countSolutions(rowIndex + 1);
+        }
+        board.togglePiece(rowIndex,i);
+        occCol.pop();
+      }
+    } 
+    
   }
+
+  countSolutions(0);
   console.log('Number of solutions for ' + n + ' rooks:', solutionCount);
   return solutionCount;
 };
@@ -130,16 +154,10 @@ window.countNQueensSolutions = function(rowSize) {
     //find valid row
     for (var columnIndex = 0; columnIndex < row.length; columnIndex++) {
       board.togglePiece(rowIndex, columnIndex);
-      if (!board.hasAnyQueensConflicts()) {
+      if (!(board.hasAnyColConflicts() || board.hasAnyMajorDiagonalConflicts() || board.hasAnyMinorDiagonalConflicts())) {
         findValidMoves(rowIndex + 1);
       }
       board.togglePiece(rowIndex, columnIndex);
-    }
-    
-    //if no valid row, return to previous row
-    var rowPieces = row.reduce((rowSum, indexValue) => rowSum + indexValue);
-    if (rowPieces === 0) {
-      return;
     }
   };
   
